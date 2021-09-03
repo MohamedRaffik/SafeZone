@@ -1,0 +1,49 @@
+version: "3.0"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sz_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_PASSWORD: "password"
+      USER: "mysql"
+    mem_limit: "6g"
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
+    networks:
+      sz:
+        ipv4_address: 172.16.2.2
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+    container_name: sz_elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: "single-node"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    mem_limit: "6g"
+    networks:
+      sz:
+        ipv4_address: 172.16.2.3
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.1
+    container_name: sz_kibana
+    ports:
+      - "5601:5601"
+    mem_limit: "6g"
+    networks:
+      sz:
+        ipv4_address: 172.16.2.4
+    depends_on:
+      - elasticsearch
+
+networks:
+  sz:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.2.0/24"
